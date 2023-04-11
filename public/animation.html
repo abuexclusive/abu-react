@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>requestAnimationFrame</title>
+
+	<script nonce="73hXffRH0ScUGojk2I5s">
+	</script>
+</head>
+
+<body>
+	<div id="root" style="width: 100px; height: 100px; background-color: red;"></div>
+  <script>
+    let count = 0;
+    let root = document.getElementById('root');
+    function animation(timestart) {
+      // timestart 每帧开始执行的毫秒数
+      console.log(timestart, `执行次数：${count++}`);
+      root.style.transform = `translateX(${count}px)`;
+      if (timestart < 1000) {
+        window.requestAnimationFrame(animation);
+      }
+      
+    }
+    window.requestAnimationFrame(animation);
+  </script>
+</body>
+
+</html>

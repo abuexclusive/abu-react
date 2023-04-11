@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>requestIdleCallback</title>
+
+	<script nonce="73hXffRH0ScUGojk2I5s"></script>
+</head>
+
+<body>
+  <div>window.requestIdleCallback</div>
+  <script>
+    function sleep(duration) {
+      const now = Date.now();
+      while (duration + now > Date.now()) {
+
+      }
+    }
+
+    const works = [
+      () => {
+        sleep(20);
+        console.log('任务1');
+      },
+      () => {
+        sleep(20);
+        console.log('任务2');
+      },
+      () => {
+        sleep(20);
+        console.log('任务3');
+      },
+      () => {
+        sleep(20);
+        console.log('任务4');
+      },
+      () => {
+        sleep(20);
+        console.log('任务5');
+      },
+    ];
+
+    function progress(dealine) {
+      console.log(`当前帧还剩下的空闲时间：${dealine.timeRemaining()}`);
+      if (dealine.timeRemaining() > 0 && works.length) {
+        performUnitOfWork();
+      }
+      // 存在下一个任务
+      if (works.length) {
+        window.requestIdleCallback(progress);
+      }
+    }
+
+    function performUnitOfWork() {
+      const work = works.shift();
+      work();
+    }
+
+    window.requestIdleCallback(progress);
+  </script>
+</body>
+
+</html>
+
+const res = await this.getCompanyList(params);
+this.companyIdOrNameList = [];
+res.data.forEach(e => {
+  const obj = {
+    value: e.companyId,
+    label: e.shortName
+  }
+  this.companyIdOrNameList.push(obj)
+})
