@@ -1,0 +1,3 @@
+react创建的root root包含两个属性current、workInProgress
+- current 指向当前的fiber树，初始化的时候react会创建一个uninitializedFiber代替current fiber树的rootFiber，初次渲染时current fiber树其实只有一个rootFiber
+- workInProgress 指向即将渲染的fiber树，初次渲染时workInProgress fiber树其实也就只有一个rootFiber，但是会根据这个rootFiber创建workInProgress fiber树
