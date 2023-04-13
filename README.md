@@ -1,37 +1,6 @@
 一、vnode
-```
-{
-  type: 'div',
-  key: null,
-  ref: null,
-  props: {
-    id: 'root',
-    children: [
-      {
-        type: 'div',
-        key: null,
-        ref: null,
-        props: {
-          id: 'app',
-          children: 'hello react'
-        }
-      }
-    ]
-  }
-}
-```
 
-
-二、fiber
-```
-{
-  statenode,
-  child,
-  sibling,
-  return,
-}
-```
-fiber特性
+二、fiber & fiber特性
 - 增量渲染：将任务拆分，均匀到每一帧里面去执行
 - 暂停、终止、复用渲染任务
 - 任务优先级：高优先级先执行 低优先级后执行，还可以任务插队
