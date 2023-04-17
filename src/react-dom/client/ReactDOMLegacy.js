@@ -9,8 +9,8 @@ export function render(element, container) {
     throw new Error('Target container is not a DOM element.');
   };
 
-  console.log('element===', element);
-  console.log('container===', container);
+  // console.log('element===', element);
+  // console.log('container===', container);
 
   const root = createRoot(container);
   root.render(element, container);

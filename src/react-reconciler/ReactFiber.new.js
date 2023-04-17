@@ -1,5 +1,5 @@
 
-import { WorkTag, HostRoot } from './ReactWorkTags';
+import { WorkTag, HostRoot, HostText } from './ReactWorkTags';
 import { NoFlags } from './ReactFiberFlags';
 
 /**
@@ -44,14 +44,14 @@ function FiberNode(
   this.flags = NoFlags;  
 
   // 连接current fiber 和 workInProgress fiber
-  this.alertnate = null;  
+  this.alternate = null;  
 
   // 挂载当前fiber上的新的状态 setState() 链表
   this.updateQueue = null;
 }
 
 
-const createFiber = function(
+export const createFiber = function(
   tag: WorkTag, 
   pendingProps, 
   key: null | string
@@ -59,6 +59,9 @@ const createFiber = function(
   return new FiberNode(tag, pendingProps, key);
 }
 
+export function createFiberFromText(content) {
+  return createFiber(HostText, content, null);
+}
 
 export function createHostRootFiber() {
   return createFiber(HostRoot, null, null);
@@ -69,7 +72,7 @@ export function createWorkInProgress(current, pendingProps) {
   // ??????
   // render阶段为每个节点创建新的fiber(workInProgress)可能会复用，生成一个新状态的workInProgress树 复用current.alertnate
   // 为什么复用current.alertnate而不是current，因为current已经渲染到页面上了，而current.alertnate还保存在内存中
-  let workInProgress = current.alertnate;
+  let workInProgress = current.alternate;
   if (workInProgress === null) {
 
     workInProgress = createFiber(
@@ -81,8 +84,8 @@ export function createWorkInProgress(current, pendingProps) {
     workInProgress.type = current.type;
     workInProgress.stateNode = current.stateNode;
     // 双指针 互相指向
-    workInProgress.alertnate = current;
-    current.alertnate = workInProgress;
+    workInProgress.alternate = current;
+    current.alternate = workInProgress;
 
   } else {
 
