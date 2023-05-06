@@ -59,13 +59,19 @@ export const createFiber = function(
   return new FiberNode(tag, pendingProps, key);
 }
 
+
+
 export function createFiberFromText(content) {
   return createFiber(HostText, content, null);
 }
 
+
+
 export function createHostRootFiber() {
   return createFiber(HostRoot, null, null);
 }
+
+
 
 export function createWorkInProgress(current, pendingProps) {
 

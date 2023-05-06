@@ -79,7 +79,7 @@ const element = (
       <p>456</p>
     </h2>
     <h3>
-      <span></span>
+      <span>def</span>
     </h3>
   </div>
 );

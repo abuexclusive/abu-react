@@ -1,6 +1,6 @@
 import { REACT_ELEMENT_TYPE } from '../shared/ReactSymbols';
 
-// 是用来检测属性是否为对象的自有属性，如果是，返回true，否者false，只会检查对象的自有属性，对象原形上的属性其不会检测
+// 是用来检测属性是否为对象的自有属性，如果是，返回true，否则false，只会检查对象的自有属性，对象原形上的属性其不会检测
 const hasOwnProperty = Object.prototype.hasOwnProperty;
 
 const RESERVED_PROPS = {

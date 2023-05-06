@@ -16,13 +16,15 @@ import {
  * @param {*} nextChildren 
  */
 function reconcileChildren(workInProgress, nextChildren) {
+  let firstChildFiber = null;
   if (!!workInProgress.alternate) {
     // workInProgress.child 就是<App />对应的fiber
-    workInProgress.child = reconcileChildFibers(workInProgress, nextChildren);
-    workInProgress.child.flags = Placement;
+    firstChildFiber = reconcileChildFibers(workInProgress, nextChildren);
+    firstChildFiber.flags = Placement;
   } else {
-    workInProgress.child = reconcileChildFibers(workInProgress, nextChildren);
+    firstChildFiber = reconcileChildFibers(workInProgress, nextChildren);
   }
+  return firstChildFiber;
 }
 
 
@@ -34,9 +36,10 @@ function updateHostRoot(workInProgress) {
   // console.log('nextChildren===', nextChildren)
 
   // 传入一个fiber和react element，根据 react element生成workInProgress的child
-  reconcileChildren(workInProgress, nextChildren);
+  const fiber = reconcileChildren(workInProgress, nextChildren);
+  workInProgress.child = fiber;
 
-  return workInProgress.child;
+  return fiber;
 }
 
 
@@ -56,8 +59,10 @@ function updateHostComponent(workInProgress) {
   }
 
   // 传入一个fiber和react element，根据 react element生成workInProgress的child
-  reconcileChildren(workInProgress, nextChildren);
-  return workInProgress.child;
+  const fiber = reconcileChildren(workInProgress, nextChildren);
+  workInProgress.child = fiber;
+
+  return fiber;
 }
 
 

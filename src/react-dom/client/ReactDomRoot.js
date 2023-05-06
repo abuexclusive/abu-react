@@ -5,25 +5,40 @@ import {
   DOCUMENT_FRAGMENT_NODE
 } from '../../shared/HTMLNodeType';
 import { 
-  createFiberRoot,
   createWorkInProgress,
   beginWork,
   completeWork,
+  workLoopConcurrent,
+  createContainer
 } from '../../react-reconciler';
 
 
 let nextUnitOfWork = null;
 
-function ReactDOMRoot(container) {
-  this._internalRoot = createFiberRoot(container);
+export function createRoot(container) {
+  if (!isValidContainer(container)) {
+    throw new Error('createRoot(...): Target container is not a DOM element.');
+  }
+  return new ReactDOMRoot(container);
 }
+
+
+function ReactDOMRoot(container) {
+  this._internalRoot = createRootImpl(container);
+}
+
+function createRootImpl(container) {
+  const root = createContainer(container);
+  return root; 
+}
+
 
 
 ReactDOMRoot.prototype.render = function(element, container) {
 
   // 不管是初次渲染还是setState，每次更新总是从Root开始往下遍历
   const root = this._internalRoot;
-  console.log('root===', root);
+  console.log('fiber root：', root);
 
   // 创建workInProgress tree的fiberRoot
   const workInProgress = createWorkInProgress(root.current, null);
@@ -38,18 +53,13 @@ ReactDOMRoot.prototype.render = function(element, container) {
   nextUnitOfWork = workInProgress;
   workLoopConcurrent(nextUnitOfWork);
 
-  console.log('workLoopConcurrent end：',  workInProgress);
+  console.log('workInProgress tree：',  workInProgress);
 
 }
 
 
 
-export function createRoot(container) {
-  if (!isValidContainer(container)) {
-    throw new Error('createRoot(...): Target container is not a DOM element.');
-  }
-  return new ReactDOMRoot(container);
-}
+
 
 export function isValidContainer(node): boolean {
   return !!(
@@ -79,7 +89,7 @@ export function isValidContainer(node): boolean {
  * </div>
  * 碰到节点下面是数组的要一次性创建完成 并返回第一个作为父fiber的child
  */
-function workLoopConcurrent(nextUnitOfWork) {
+function workLoopConcurrent_1(nextUnitOfWork) {
 
   while(!!nextUnitOfWork) {
     // debugger
@@ -93,7 +103,7 @@ function workLoopConcurrent(nextUnitOfWork) {
     // step 6: ......
     // 当一个节点没有子节点和兄弟节点的时候 需要回溯到父节点，从workInProgress树的rootfiber出发最终回到workInProgress树的rootfiber
 
-    nextUnitOfWork = performUnitOfWork(nextUnitOfWork);
+    nextUnitOfWork = performUnitOfWork_1(nextUnitOfWork);
     // break;
   }
 }
@@ -103,7 +113,7 @@ function workLoopConcurrent(nextUnitOfWork) {
  * 根据当前的fiber 返回下一个fiber（子fiber、兄弟fiber、父fiber）
  * @param {*} workInProgress 当前的fiber
  */
-function performUnitOfWork(workInProgress) {
+function performUnitOfWork_1(workInProgress) {
   // 1 rootfiber
   // 2 <div id="sky" key="halo"> fiber
   // 3 <h1> fiber
@@ -119,7 +129,7 @@ function performUnitOfWork(workInProgress) {
     // workInProgress就是'first child' fiber
 
     // console.log('completeUnitOfWork====', workInProgress)
-    next = completeUnitOfWork(workInProgress);
+    next = completeUnitOfWork_1(workInProgress);
 
   }
 
@@ -140,7 +150,7 @@ function performUnitOfWork(workInProgress) {
  * 负责根据当前fiber 找兄弟节点 没有兄弟节点 就找父节点
  * @param {*} workInProgress 当前fiber
  */
-function completeUnitOfWork(workInProgress) {
+function completeUnitOfWork_1(workInProgress) {
   // debugger
   // console.log('completeUnitOfWork====', workInProgress)
   while(workInProgress) {

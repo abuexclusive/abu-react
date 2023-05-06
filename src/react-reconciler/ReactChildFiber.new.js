@@ -7,7 +7,7 @@ import {
 import {
   createFiber,
   createFiberFromText,
-} from './ReactFiber.new';
+} from './ReactFiber.old';
 
 
 function reconcileSingleElement(returnFiber, element) {

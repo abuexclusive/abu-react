@@ -12,10 +12,30 @@ export function render(element, container) {
   // console.log('element===', element);
   // console.log('container===', container);
 
-  const root = createRoot(container);
-  root.render(element, container);
+  legacyRenderSubtreeIntoContainer(element, container);
+}
+
+function legacyRenderSubtreeIntoContainer(children, container) {
+  let root = container._reactRootContainer;
+  let fiberRoot;
+
+  if (!root) {
+    root = legacyCreateRootFromDOMContainer(container);
+    fiberRoot = root._internalRoot;
+  }
+  console.log('root: ', root);
+  console.log('fiberRoot: ', fiberRoot);
+}
 
 
-
+function legacyCreateRootFromDOMContainer(container) {
+  // return {
+  //   _internalRoot: {
+  //     container: div#root,
+  //     current: null,
+  //     finishedWork: null,
+  //   }
+  // }
+  return createRoot(container);
 }
 
