@@ -1,9 +1,71 @@
+import { createWorkInProgress } from "./ReactFiber.old";
 import { beginWork } from "./ReactFiberBeginWork.new";
 import { completeWork } from "./ReactFiberCompleteWork.new";
+import { HostRoot } from "./ReactWorkTags";
+
+
+// 更新分为两步
+// 1、render 根据老的fiber树 和 新的虚拟DOM构建新的fiber树并找出差异，也就是diff的结果，可以中断
+// 2、commit 根据diff结果更新真是DOM，更新完成之后新的fiber树，就成为fiberRoot的current，不可以中断
+
+
+let workInProgressRoot = null;
+let workInProgress = null;
+
+
+/**
+ * 不管如何更新，哪个fiber更新，都会调度到这个方法里
+ * @param {*} fiber 
+ */
+export function scheduleUpdateOnFiber(fiber) {
+  // console.log('fiber: ', fiber);
+
+  // 这里是根据当前的fiber追溯到fiberRoot，因为不管是哪个fiber更新 都需要从rootFiber开始
+  // 当前fiber所在的fiber树 找到rootFiber 其实就是hostRootFiber，在hostRootFiber上调度更新
+  const root = markUpdateLaneFromFiberToRoot(fiber);
+
+  performSyncWorkOnRoot(root);
+
+}
+
+// 向上找到根节点
+function markUpdateLaneFromFiberToRoot(sourceFiber) {
+  let node = sourceFiber;
+  let parent = sourceFiber.return;
+
+  while (parent !== null) {
+    node = parent;
+    parent = parent.return;
+  }
+
+  if (node.tag === HostRoot) {
+    // root fiberRoot
+    const root = node.stateNode;
+    return root;
+  } else {
+    return null;
+  }
+
+}
+
+// 开始在根节点上执行工作循环
+function performSyncWorkOnRoot(root) {
+  
+  // root === fiberRoot
+  workInProgressRoot = root;
+  const current = root.current;
+  workInProgress = createWorkInProgress(current, null);
+
+  console.log('workInProgress: ', workInProgress);
+
+}
+
+
+
 
 /**
  * 建workInProgress树，workInProgress树的每个节点都叫workInProgress
- * @param {*} nextUnitOfWork 下一个工作单元
+ * nextUnitOfWork 下一个工作单元
  * <div id="sky" key="halo">
     <h1>
       first child
@@ -16,7 +78,7 @@ import { completeWork } from "./ReactFiberCompleteWork.new";
  * </div>
  * 碰到节点下面是数组的要一次性创建完成 并返回第一个作为父fiber的child
  */
-function workLoopConcurrent(nextUnitOfWork) {
+export function workLoopConcurrent(nextUnitOfWork) {
 
   while(!!nextUnitOfWork) {
     // debugger
@@ -90,6 +152,4 @@ function completeUnitOfWork(unitOfWork) {
 
 }
 
-export {
-  workLoopConcurrent
-};
+

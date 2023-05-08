@@ -3,6 +3,8 @@
  */
 
 import { isValidContainer, createRoot } from './ReactDomRoot';
+import { updateContainer } from '../../react-reconciler';
+
 
 export function render(element, container) {
   if (!isValidContainer(container)) {
@@ -10,7 +12,7 @@ export function render(element, container) {
   };
 
   // console.log('element===', element);
-  // console.log('container===', container);
+
 
   legacyRenderSubtreeIntoContainer(element, container);
 }
@@ -22,9 +24,17 @@ function legacyRenderSubtreeIntoContainer(children, container) {
   if (!root) {
     root = legacyCreateRootFromDOMContainer(container);
     fiberRoot = root._internalRoot;
+  } else {
+    // TODO
+    // ...
+    
   }
-  console.log('root: ', root);
-  console.log('fiberRoot: ', fiberRoot);
+
+  // console.log('fiberRoot: ', fiberRoot);
+
+  // 更新容器
+  updateContainer(children, fiberRoot);
+
 }
 
 

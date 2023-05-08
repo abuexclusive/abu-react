@@ -78,6 +78,7 @@ export function createWorkInProgress(current, pendingProps) {
   // ??????
   // render阶段为每个节点创建新的fiber(workInProgress)可能会复用，生成一个新状态的workInProgress树 复用current.alertnate
   // 为什么复用current.alertnate而不是current，因为current已经渲染到页面上了，而current.alertnate还保存在内存中
+  // current fiber树代表的是和页面中真是DOM完全一致的fiber树，也就是说current已经完全渲染到页面中了
   let workInProgress = current.alternate;
   if (workInProgress === null) {
 
@@ -95,6 +96,7 @@ export function createWorkInProgress(current, pendingProps) {
 
   } else {
 
+    workInProgress.pendingProps = pendingProps;
   }
 
   // ??????

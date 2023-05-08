@@ -1,4 +1,5 @@
 import { createHostRootFiber } from "./ReactFiber.old";
+import { initializeUpdateQueue } from "./ReactUpdateQueue.old";
 
 function FiberRootNode(containerInfo) {
 
@@ -26,6 +27,9 @@ export function createFiberRoot(containerInfo) {
   let uninitializedFiber = createHostRootFiber();
   root.current = uninitializedFiber;
   uninitializedFiber.stateNode = root;
+
+  // 初始化更新队列
+  initializeUpdateQueue(uninitializedFiber);
 
   return root;
 }
