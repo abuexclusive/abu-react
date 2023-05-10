@@ -1,5 +1,5 @@
 import { createWorkInProgress } from "./ReactFiber.old";
-import { beginWork } from "./ReactFiberBeginWork.new";
+import { beginWork } from "./ReactFiberBeginWork.old";
 import { completeWork } from "./ReactFiberCompleteWork.new";
 import { HostRoot } from "./ReactWorkTags";
 
@@ -7,15 +7,12 @@ import { HostRoot } from "./ReactWorkTags";
 // 更新分为两步
 // 1、render 根据老的fiber树 和 新的虚拟DOM构建新的fiber树并找出差异，也就是diff的结果，可以中断
 // 2、commit 根据diff结果更新真是DOM，更新完成之后新的fiber树，就成为fiberRoot的current，不可以中断
-
-
 let workInProgressRoot = null;
 let workInProgress = null;
 
 
 /**
  * 不管如何更新，哪个fiber更新，都会调度到这个方法里
- * @param {*} fiber 
  */
 export function scheduleUpdateOnFiber(fiber) {
   // console.log('fiber: ', fiber);
@@ -28,7 +25,10 @@ export function scheduleUpdateOnFiber(fiber) {
 
 }
 
-// 向上找到根节点
+
+/**
+ * 向上找到根节点
+ */
 function markUpdateLaneFromFiberToRoot(sourceFiber) {
   let node = sourceFiber;
   let parent = sourceFiber.return;
@@ -48,7 +48,9 @@ function markUpdateLaneFromFiberToRoot(sourceFiber) {
 
 }
 
-// 开始在根节点上执行工作循环
+/**
+ * 开始在根节点上执行工作循环
+ */
 function performSyncWorkOnRoot(root) {
   
   // root === fiberRoot
@@ -56,31 +58,55 @@ function performSyncWorkOnRoot(root) {
   const current = root.current;
   workInProgress = createWorkInProgress(current, null);
 
-  console.log('workInProgress: ', workInProgress);
 
+  /**
+   * 
+   *                                           ---------------------------
+   *                                           |     FiberRootNode       |
+   *                                           | containerInfo(div#root) |
+   *                                           ---------------------------
+   *                                              ^            |
+   *                                              |            |current
+   *                                              |stateNode   |
+   *                                              |            V
+   *                                      ------------------------      alternate      ------------------------
+   *                                      |     hostRootFiber    |     ---------->     |    workInprogress    |
+   *                                      | updateQueue(element) |     <----------     | updateQueue(element) |
+   *                                      ------------------------      alternate      ------------------------
+   */
+
+
+  // 1、根据虚拟DOM react element创建新的fiber tree
+  // 2、把新的fiber tree的内容同步到真实DOM中
+  workLoopSync();
+
+}
+
+/**
+ * 工作循环 同步
+ */
+function workLoopSync() {
+  let index = 1;
+  while (workInProgress !== null) {
+    // console.log('workInProgress: ', index, workInProgress);
+    workInProgress = performUnitOfWork(workInProgress);
+    
+    break;
+    index++;
+  }
 }
 
 
 
 
 /**
+ * 工作循环 并发
  * 建workInProgress树，workInProgress树的每个节点都叫workInProgress
- * nextUnitOfWork 下一个工作单元
- * <div id="sky" key="halo">
-    <h1>
-      first child
-    </h1>
-    <h2>
-      h1 sibling child
-      <p>456</p>
-    </h2>
-    <h3>h2 sibling child</h3>
- * </div>
  * 碰到节点下面是数组的要一次性创建完成 并返回第一个作为父fiber的child
  */
-export function workLoopConcurrent(nextUnitOfWork) {
+function workLoopConcurrent() {
 
-  while(!!nextUnitOfWork) {
+  while(workInProgress !== null) {
     // debugger
     // 当没有下一个工作单元时说明fiber树已经创建完成
     // 深度优先遍历创建fiber
@@ -92,17 +118,24 @@ export function workLoopConcurrent(nextUnitOfWork) {
     // step 6: ......
     // 当一个节点没有子节点和兄弟节点的时候 需要回溯到父节点，从workInProgress树的rootfiber出发最终回到workInProgress树的rootfiber
 
-    nextUnitOfWork = performUnitOfWork(nextUnitOfWork);
+    workInProgress = performUnitOfWork(workInProgress);
     // break;
   }
 }
 
 function performUnitOfWork(unitOfWork) {
-  let next = beginWork(unitOfWork);
+
+  // 当前fiber的替身
+  const current = unitOfWork.alternate;
+
+  let next = beginWork(current, unitOfWork);
 
   if (next === null) {
 
     next = completeUnitOfWork(unitOfWork);
+
+  } else {
+    workInProgress = next;
   }
 
   return next;
@@ -151,5 +184,4 @@ function completeUnitOfWork(unitOfWork) {
   }
 
 }
-
 

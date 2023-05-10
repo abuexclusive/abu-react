@@ -1,5 +1,5 @@
 
-import { WorkTag, HostRoot, HostText } from './ReactWorkTags';
+import { WorkTag, HostRoot, HostText, HostComponent } from './ReactWorkTags';
 import { NoFlags } from './ReactFiberFlags';
 
 /**
@@ -61,12 +61,6 @@ export const createFiber = function(
 
 
 
-export function createFiberFromText(content) {
-  return createFiber(HostText, content, null);
-}
-
-
-
 export function createHostRootFiber() {
   return createFiber(HostRoot, null, null);
 }
@@ -119,8 +113,29 @@ export function createWorkInProgress(current, pendingProps) {
 }
 
 
+export function createFiberFromText(content) {
+  return createFiber(HostText, content, null);
+}
+
+
+export function createFiberFromElement(element) {
+  const type = element.type;
+  const key = element.key;
+  const pendingProps = element.props;
+
+  let tag;
+  if (typeof type === 'string') {
+    tag = HostComponent;
+  }
+  const fiber = createFiber(tag, pendingProps, key);
+  fiber.type = type;
+
+  return fiber;
+}
+
 
 /**
+ * 
  * 当组件执行setState的时候 会先找到组件对应的fiber，将更新放到fiber的updateQueue上
  * 只有当组件初次渲染的时候，会给组件的实例一个属性_reactInternals，而这个属性指向该组件的fiber
  * 

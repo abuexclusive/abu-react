@@ -13,8 +13,7 @@ import {
   createWorkInProgress,
 } from './ReactFiber.old';
 
-import { workLoopConcurrent } from './ReactFiberWorkLoop.old';
-import { beginWork } from './ReactFiberBeginWork.new';
+import { beginWork } from './ReactFiberBeginWork.old';
 import { completeWork } from './ReactFiberCompleteWork.new';
 
 
@@ -24,7 +23,6 @@ export {
   createHostRootFiber,
   updateContainer,
   createWorkInProgress,
-  workLoopConcurrent,
   beginWork,
   completeWork,
 };

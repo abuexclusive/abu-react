@@ -5,13 +5,10 @@ import {
   DOCUMENT_FRAGMENT_NODE
 } from '../../shared/HTMLNodeType';
 import { 
-  createWorkInProgress,
-  workLoopConcurrent,
-  createContainer
+  createContainer,
+  updateContainer
 } from '../../react-reconciler';
 
-
-let nextUnitOfWork = null;
 
 export function createRoot(container) {
   if (!isValidContainer(container)) {
@@ -32,26 +29,27 @@ function createRootImpl(container) {
 
 
 
-ReactDOMRoot.prototype.render = function(element, container) {
+ReactDOMRoot.prototype.render = function(element) {
 
   // 不管是初次渲染还是setState，每次更新总是从Root开始往下遍历
   const root = this._internalRoot;
   console.log('fiber root：', root);
 
   // 创建workInProgress tree的fiberRoot
-  const workInProgress = createWorkInProgress(root.current, null);
+  // const workInProgress = createWorkInProgress(root.current, null);
 
   // 用于创建其他元素的fiber节点
-  workInProgress.memoizedState = { element: element };
+  // workInProgress.memoizedState = { element: element };
 
   // console.log('current===', root.current)
   // console.log('workInProgress===', workInProgress)
 
   // 根据workInProgress树的rootfiber创建workInProgress树
-  nextUnitOfWork = workInProgress;
-  workLoopConcurrent(nextUnitOfWork);
+  // nextUnitOfWork = workInProgress;
+  // workLoopConcurrent(nextUnitOfWork);
 
-  console.log('workInProgress tree：',  workInProgress);
+  // console.log('workInProgress tree：',  workInProgress);
+  updateContainer(element, root);
 
 }
 
