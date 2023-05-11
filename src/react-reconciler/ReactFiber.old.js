@@ -1,5 +1,5 @@
 
-import { WorkTag, HostRoot, HostText, HostComponent } from './ReactWorkTags';
+import { HostRoot, HostText, HostComponent } from './ReactWorkTags';
 import { NoFlags } from './ReactFiberFlags';
 
 /**
@@ -9,9 +9,9 @@ import { NoFlags } from './ReactFiberFlags';
  * @param {*} key 
  */
 function FiberNode(
-  tag: WorkTag, 
+  tag, 
   pendingProps, 
-  key: null | string
+  key
 ) {
 
   // Instance
@@ -52,9 +52,9 @@ function FiberNode(
 
 
 export const createFiber = function(
-  tag: WorkTag, 
+  tag, 
   pendingProps, 
-  key: null | string
+  key
 ) {
   return new FiberNode(tag, pendingProps, key);
 }

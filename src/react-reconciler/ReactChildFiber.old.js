@@ -12,12 +12,6 @@ import {
 import { Placement } from './ReactFiberFlags';
 
 
-// function reconcileSingleTextNode(returnFiber, textContent) {
-//   const fiber = createFiberFromText(textContent);
-//   fiber.return = returnFiber;
-//   return fiber;
-// }
-
 // function reconcileChildrenArray(returnFiber, newChildren) {
 //   // newChildren：['text', {…}, {…}, {…}]
 //   // console.log('newChildren===', newChildren)
@@ -66,7 +60,17 @@ import { Placement } from './ReactFiberFlags';
 
 function ChildReconciler(shouldTrackSideEffects) {
 
+  // 放置单节点 打标记
+  function placeSingChild(newFiber) {
+    if (shouldTrackSideEffects && newFiber.alternate === null) {
+      // 给新fiber添加副作用，表示在未来提交阶段的DOM操作中会向真实DOM树中添加此节点
+      // Placement 添加 创建 或者挂载
+      newFiber.flags = Placement;
+    }
+    return newFiber;
+  }
 
+  // 根据单个 element 创建 fiber
   function reconcileSingleElement(returnFiber, currentFirstChild, element) {
     // element type：ƒ App() ｜ div
     // 不管是函数组件还是类组件 babel编译 react element的type都是ƒ () 
@@ -76,27 +80,28 @@ function ChildReconciler(shouldTrackSideEffects) {
     return created;
   }
 
-
-  // 放置单节点 打标记
-  function placeSingChild(newFiber) {
-    if (shouldTrackSideEffects && newFiber.alternate === null) {
-      // 给新fiber添加副作用，表示在未来提交阶段的DOM操作中会向真实DOM树中添加此节点
-      newFiber.flags = Placement;
-    }
-    return newFiber;
+  // 根据 text 创建 fiber
+  function reconcileSingleTextNode(returnFiber, currentFirstChild, textContent) {
+    const created = createFiberFromText(textContent);
+    created.return = returnFiber;
+    return created;
   }
+
+  // 根据多个 element 创建 fiber，此时是数组，同级的 fiber 需要循环创建完成
+  function reconcileChildrenArray(returnFiber, currentFirstChild, newChildren) {
+    console.log('returnFiber: ', returnFiber, newChildren)
+  }
+
+
+  
 
   // returnFiber 父fiber节点
   // currentFirstChild 老fiber子节点
   // newChild react element
   function reconcileChildFibers(returnFiber, currentFirstChild, newChild) {
 
-    // console.log('returnFiber: ', returnFiber)
-    // console.log('currentFirstChild: ', currentFirstChild)
-    // console.log('newChild: ', newChild)
-
     // newChild可能为{}，[]
-    const isObject = typeof newChild === 'object' && newChild && newChild.$$typeof;
+    const isObject = typeof newChild === 'object' && newChild !== null;
     if (isObject) {
       // 单节点
       switch (newChild.$$typeof) {
@@ -108,13 +113,12 @@ function ChildReconciler(shouldTrackSideEffects) {
           default:
             break;
       }
-      // return reconcileSingleElement(returnFiber, newChild);
     }
 
     const isArray = Array.isArray(newChild);
 
     if (isArray) {
-      // return reconcileChildrenArray(returnFiber, newChild);
+      return reconcileChildrenArray(returnFiber, currentFirstChild, newChild);
     }
 
     const isText = typeof newChild === 'string' || typeof newChild === 'number';
@@ -122,8 +126,11 @@ function ChildReconciler(shouldTrackSideEffects) {
     if (isText) {
 
     }
+
+    return null;
     
   }
+
   return reconcileChildFibers;
 }
 

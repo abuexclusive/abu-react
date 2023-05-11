@@ -1,5 +1,21 @@
 
 import { HostComponent, HostText } from './ReactWorkTags';
+import { 
+  createInstance,
+  finalizeInitialChildren,
+} from '../react-dom/client/ReactDOMHostConfig';
+
+
+function createTextInstance(workInProgress) {
+  const text = workInProgress.pendingProps;
+  const instance = document.createTextNode(text);
+  return instance;
+}
+
+function appendAllChildren() {
+  
+}
+
 
 /**
  * 1、创建真实的DOM
@@ -7,10 +23,10 @@ import { HostComponent, HostText } from './ReactWorkTags';
  * 3、给DOM赋值属性
  * @param {*} workInProgress 
  */
-function completeWork(workInProgress) {
-  console.log('completeWork====', workInProgress)
+function completeWork(current, workInProgress) {
+  // console.log('completeWork workInProgress: ', workInProgress);
 
-
+  const newProps = workInProgress.pendingProps;
   // 1、创建真实的DOM
     // 1.1、<h1>对应的fiber，这时<h1>对应的fiber有兄弟节点<h2>，该兄弟节点已经在beginWork中创建完成，返回<h2>对应的fiber，作为下一个工作单元
     // 1.2、文本'123'对应的fiber，有兄弟节点<p>，返回<p>对应的fiber，作为下一个工作单元
@@ -22,8 +38,12 @@ function completeWork(workInProgress) {
     // 1.8、rootfiber没有兄弟节点也没有父节点 结束循环
   switch (workInProgress.tag) {
     case HostComponent: {
-      const instance = createInstance(workInProgress);
+      const type = workInProgress.type;
+      // 创建真实DOM
+      const instance = createInstance(type, newProps);
       workInProgress.stateNode = instance;
+      // 给真实DOM添加属性
+      finalizeInitialChildren(instance, type, newProps);
       return null;
     }
     case HostText: {
@@ -34,37 +54,7 @@ function completeWork(workInProgress) {
     default:
       return null;
   }
-  // if (tag === HostComponent) {
-    // if (!instance) {
-    //   const dom = document.createElement(workInProgress.type);
-    //   workInProgress.stateNode = dom;
-    //   dom.__reactInternalInstance = workInProgress;
-
-    //   const node = workInProgress.child;
-    //   while(!!node) {
-    //     let tag = node.tag;
-    //     if (tag === HostComponent || tag === HostText) {
-    //       dom.appendChild(node.stateNode || document.createTextNode('ceshi'));
-    //     }
-    //     break;
-    //   }
-    // }
-  // }
 }
 
-function createInstance(workInProgress) {
-  const instance = document.createElement(workInProgress.type);
-  return instance;
-}
-
-function createTextInstance(workInProgress) {
-  const text = workInProgress.pendingProps;
-  const instance = document.createTextNode(text);
-  return instance;
-}
-
-function appendAllChildren() {
-  
-}
 
 export { completeWork };

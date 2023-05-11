@@ -71,16 +71,22 @@ import * as ReactDOM from './react-dom';
 
 // ReactDOM.render(<App name="app" key="sky" />, document.getElementById('root'));
 
+// const element = (
+//   <div name="app" key="sky">
+//     <h1>abc</h1>
+//     <h2>
+//       123
+//       <p>456</p>
+//     </h2>
+//     <h3>
+//       <span>def</span>
+//     </h3>
+//   </div>
+// );
+
 const element = (
   <div name="app" key="sky">
-    <h1>abc</h1>
-    <h2>
-      123
-      <p>456</p>
-    </h2>
-    <h3>
-      <span>def</span>
-    </h3>
+    test
   </div>
 );
 

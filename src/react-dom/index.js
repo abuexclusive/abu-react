@@ -1,3 +1,5 @@
 export {
-  render
+  render,
+  shouldSetTextContent,
+  createInstance,
 } from './client/ReactDOM';

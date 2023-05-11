@@ -4,11 +4,13 @@ import {
   HostText,
   ClassComponent,
 } from './ReactWorkTags';
-import { Placement } from './ReactFiberFlags';
 import {
   mountChildFibers,
   reconcileChildFibers
 } from './ReactChildFiber.old';
+import {
+  shouldSetTextContent
+} from '../react-dom';
 
 
 function updateHostRoot(current, workInProgress) {
@@ -28,8 +30,10 @@ function updateHostRoot(current, workInProgress) {
 }
 
 
-function updateHostComponent(workInProgress) {
-  // debugger
+function updateHostComponent(current, workInProgress) {
+
+  // console.log('workInProgress: ', workInProgress);
+
   const nextProps = workInProgress.pendingProps;
   let nextChildren = nextProps.children;
 
@@ -38,16 +42,15 @@ function updateHostComponent(workInProgress) {
 
 
   // 如果nextChildren是一个string｜number 证明该fiber有且仅有一个孤立的文本节点，这个文本节点不创建fiber
-  if (typeof nextChildren === 'string' || typeof nextChildren === 'number') {
+  const isDirectTextChild = shouldSetTextContent(nextChildren);
+  if (isDirectTextChild) {
     nextChildren = null;
-    // nextChildren 传入以下reconcileChildren函数最终返回null
   }
 
   // 传入一个fiber和react element，根据 react element生成workInProgress的child
-  const fiber = reconcileChildren(workInProgress, nextChildren);
-  workInProgress.child = fiber;
+  reconcileChildren(current, workInProgress, nextChildren);
 
-  return fiber;
+  return workInProgress.child;
 }
 
 
@@ -76,12 +79,7 @@ export function reconcileChildren(current, workInProgress, nextChildren) {
       nextChildren,
     );
   }
-  console.log('workInProgress: ', workInProgress);
 }
-
-
-
-
 
 
 
@@ -99,7 +97,7 @@ function beginWork(current, workInProgress) {
   // 🔥🔥🔥🔥未处理 tag = FunctionComponent | ClassComponent
 
   // console.log('current: ', current)
-  // console.log('workInProgress: ', workInProgress)
+  console.log('beginWork workInProgress: ', workInProgress);
 
   switch(workInProgress.tag) {
     case HostRoot:
