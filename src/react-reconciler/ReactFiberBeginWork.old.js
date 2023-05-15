@@ -65,6 +65,7 @@ export function reconcileChildren(current, workInProgress, nextChildren) {
 
   if (current === null) {
     // 挂载 不需要比较 全是新的
+    // 不需要跟踪副作用
     workInProgress.child = mountChildFibers(
       workInProgress,
       null,
@@ -97,7 +98,7 @@ function beginWork(current, workInProgress) {
   // 🔥🔥🔥🔥未处理 tag = FunctionComponent | ClassComponent
 
   // console.log('current: ', current)
-  console.log('beginWork workInProgress: ', workInProgress);
+  // console.log('beginWork workInProgress: ', workInProgress);
 
   switch(workInProgress.tag) {
     case HostRoot:

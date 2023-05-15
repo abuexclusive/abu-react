@@ -1,7 +1,13 @@
 import { createWorkInProgress } from "./ReactFiber.old";
 import { beginWork } from "./ReactFiberBeginWork.old";
-import { completeWork } from "./ReactFiberCompleteWork.new";
+import { completeWork } from "./ReactFiberCompleteWork.old";
+import { Deletion, NoFlags, Placement, PlacementAndUpdate, Update } from "./ReactFiberFlags";
 import { HostRoot } from "./ReactWorkTags";
+import { 
+  commitDeletion,
+  commitPlacement,
+  commitWork,
+} from "./ReactFiberCommitWork.old";
 
 
 // 更新分为两步
@@ -76,9 +82,10 @@ function performSyncWorkOnRoot(root) {
    */
 
 
-  // 1、根据虚拟DOM react element创建新的fiber tree
-  // 2、把新的fiber tree的内容同步到真实DOM中
+  // workLoopSync 功能 执行工作循环，根据虚拟DOM react element创建新的fiber tree 和 副作用链表
   workLoopSync();
+
+  commitRoot(root);
 
 }
 
@@ -86,12 +93,8 @@ function performSyncWorkOnRoot(root) {
  * 工作循环 同步
  */
 function workLoopSync() {
-  let index = 1;
   while (workInProgress !== null) {
-    console.log('workInProgress: ', index, workInProgress);
     performUnitOfWork(workInProgress);
-    if (index === 2) break;
-    index++;
   }
 }
 
@@ -101,11 +104,13 @@ function performUnitOfWork(unitOfWork) {
   // 当前fiber的替身
   const current = unitOfWork.alternate;
 
+  // beginWork 是创建fiber 并添加 Placement 副作用
   let next = beginWork(current, unitOfWork);
 
 
   if (next === null) {
     
+    // completeUnitOfWork 是 创建stateNode 并收集副作用
     completeUnitOfWork(unitOfWork);
 
   } else {
@@ -113,21 +118,65 @@ function performUnitOfWork(unitOfWork) {
   }
 }
 
+
+// 创建stateNode 并收集副作用
 function completeUnitOfWork(unitOfWork) {
   let completedWork = unitOfWork;
 
   do {
 
-    const current = completeWork.alternate;
+    const current = completedWork.alternate;
     const returnFiber = completedWork.return;
 
-    // 完成此fiber对应真实DOM的创建 和 属性赋值的功能
+    // 1、完成此fiber对应真实DOM的创建 指向fiber的stateNode属性 和 属性赋值的功能
     completeWork(current, completedWork);
 
-    console.log(111, completedWork, returnFiber)
+    
+    // 2、收集副作用，只要当前完成的fiber completedWork 对应的flags !== NoFlags，就要将此fiber的副作用上交给 returnFiber
+    if (returnFiber !== null) {
+      // 2.1、把自己的 effectlist 交给 returnFiber
+      if (returnFiber.firstEffect === null) {
+        returnFiber.firstEffect = completedWork.firstEffect;
+      }
+      if (completedWork.lastEffect !== null) {
+        if (returnFiber.lastEffect !== null) {
+          returnFiber.lastEffect.nextEffect = completedWork.firstEffect;
+        }
+        returnFiber.lastEffect = completedWork.lastEffect;
+      }
 
-    // 收集副作用 
-    break;
+      // 2.2、把自己的交给 returnFiber
+      const flags = completedWork.flags;
+      if (flags !== NoFlags) {
+        // 说明此fiber有副作用
+
+        if (returnFiber.lastEffect !== null) {
+          // returnFiber 有 effectlist
+          // 将新的副作用挂载到 returnFiber effectlist的后面
+          returnFiber.lastEffect.nextEffect = completedWork;
+
+        } else {
+          // returnFiber 没有 effectlist
+          // 将新的副作用挂载到 returnFiber effectlist的第一个
+          returnFiber.firstEffect = completedWork;
+        }
+
+        returnFiber.lastEffect = completedWork;
+      }
+    }
+
+    // 3、找下一个fiber 先找sibling 没有 sibling 返回 returnFiber
+    const siblingFiber = completedWork.sibling;
+    if (siblingFiber !== null) {
+      workInProgress = siblingFiber;
+      return;
+    }
+
+    // 没有 sibling 说明 returnFiber 下面已经没有节点了 这时 completedWork = returnFiber;
+    completedWork = returnFiber;
+
+    // 更新 workInProgress，最终是 null，结束工作循环
+    workInProgress = returnFiber;
 
   } while (completedWork !== null)
 
@@ -178,3 +227,55 @@ function completeUnitOfWork(unitOfWork) {
 
 }
 
+function commitRoot(root) {
+  // 指向新的fiber tree
+  const finishedWork = root.current.alternate;
+  root.finishedWork = finishedWork;
+
+  commitMutationEffects(root);
+
+}
+
+
+// 根据副作用链 effectlist 添加真实DOM
+// effectlist 是先放先执行 后放后执行
+function commitMutationEffects(root) {
+
+  const finishedWork = root.finishedWork;
+
+  // 获取新的fiber tree的 effectlist
+  let nextEffect = finishedWork.firstEffect;
+
+
+
+  while (nextEffect !== null) {
+
+    const flags = nextEffect.flags;
+
+    // 这里 flags 对应 Placement Update PlacementAndUpdate 和 Deletion 处理各不相同
+
+    // eslint-disable-next-line default-case
+    switch (flags) {
+      case Placement: {
+        // 把 fiber 对应的 真实DOM插入容器中
+        commitPlacement(nextEffect);
+        break;
+      }
+      case Update: {
+        const current = nextEffect.alternate;
+        commitWork(current, nextEffect);
+        break;
+      }
+      case PlacementAndUpdate: {
+        break;
+      }
+      case Deletion: {
+        commitDeletion(nextEffect);
+        break;
+      }
+    }
+
+    nextEffect = nextEffect.nextEffect;
+  }
+
+}

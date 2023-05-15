@@ -84,14 +84,14 @@ import * as ReactDOM from './react-dom';
 //   </div>
 // );
 
-const element = (
-  <div name="app" key="sky">
-    test
-  </div>
-);
+// const element = (
+//   <div name="app" key="sky">
+//     test
+//   </div>
+// );
 
 
-ReactDOM.render(element, document.getElementById('root'));
+// ReactDOM.render(element, document.getElementById('root'));
 
 
 // const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -102,3 +102,22 @@ ReactDOM.render(element, document.getElementById('root'));
 // );
 
 // ReactDOM.render(element, document.getElementById('root'))
+
+const mountWork = document.getElementById('mount');
+const singleUpdateWork = document.getElementById('singleUpdate');
+
+mountWork.addEventListener('click', () => {
+  const element = (
+    <div key="app" id="title">title</div>
+  );
+  ReactDOM.render(element, document.getElementById('root'));
+
+});
+
+singleUpdateWork.addEventListener('click', () => {
+  const element = (
+    <div key="app" id="title2">title2</div>
+  );
+  ReactDOM.render(element, document.getElementById('root'));
+
+});

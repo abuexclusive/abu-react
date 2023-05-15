@@ -13,21 +13,23 @@ export function render(element, container) {
 
   // console.log('element===', element);
 
+  // debugger
 
   legacyRenderSubtreeIntoContainer(element, container);
 }
 
 function legacyRenderSubtreeIntoContainer(children, container) {
+  // 第一次 container 是没有 _reactRootContainer，无论渲染多少次 fiberRoot 是同一个 
   let root = container._reactRootContainer;
   let fiberRoot;
 
   if (!root) {
-    root = legacyCreateRootFromDOMContainer(container);
+    root = container._reactRootContainer = legacyCreateRootFromDOMContainer(container);
     fiberRoot = root._internalRoot;
   } else {
     // TODO
     // ...
-    
+    fiberRoot = root._internalRoot;
   }
 
   // console.log('fiberRoot: ', fiberRoot);

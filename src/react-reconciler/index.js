@@ -14,7 +14,7 @@ import {
 } from './ReactFiber.old';
 
 import { beginWork } from './ReactFiberBeginWork.old';
-import { completeWork } from './ReactFiberCompleteWork.new';
+import { completeWork } from './ReactFiberCompleteWork.old';
 
 
 export {

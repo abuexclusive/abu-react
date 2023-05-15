@@ -48,6 +48,11 @@ function FiberNode(
 
   // 挂载当前fiber上的新的状态 setState() 链表
   this.updateQueue = null;
+
+  // 副作用链表
+  this.firstEffect = null;
+  this.nextEffect = null;
+  this.lastEffect = null;
 }
 
 
@@ -105,8 +110,8 @@ export function createWorkInProgress(current, pendingProps) {
   workInProgress.sibling = current.sibling;
   workInProgress.index = current.index;
 
-  // console.log('current===', current)
-  // console.log('workInProgress===', workInProgress)
+  // console.log('current: ', current)
+  // console.log('workInProgress: ', workInProgress)
 
   return workInProgress;
 

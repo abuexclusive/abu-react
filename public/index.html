@@ -15,6 +15,12 @@
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
+    <div id="root" style="margin-bottom: 16px; margin-top: 16px;"></div>
+
+    <div>
+      <button id="mount">渲染</button> &lt;div key=&quot;app&quot; id=&quot;title&quot;&gt;title&lt;/div&gt;<br/><br/>
+
+      <button id="singleUpdate">单节点更新：Key相同Type相同 复用老节点只更新属性</button>  &lt;div key=&quot;app&quot; id=&quot;title2&quot;&gt;title2&lt;/div&gt;<br/><br/>
+    </div>
   </body>
 </html>
