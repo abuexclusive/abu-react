@@ -9,7 +9,7 @@
 
 export const NoFlags = /*                      */ '无副作用';
 
-export const Placement = /*                    */ '添加/创建';
+export const Placement = /*                    */ '插入';
 export const Update = /*                       */ '更新';
 export const PlacementAndUpdate = /*           */ '移动';
 export const Deletion = /*                     */ '删除';

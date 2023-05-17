@@ -96,6 +96,12 @@ export function createWorkInProgress(current, pendingProps) {
   } else {
 
     workInProgress.pendingProps = pendingProps;
+
+    workInProgress.flags = NoFlags;
+
+    workInProgress.nextEffect = null;
+    workInProgress.firstEffect = null;
+    workInProgress.lastEffect = null;
   }
 
   // ??????
@@ -104,7 +110,7 @@ export function createWorkInProgress(current, pendingProps) {
   // 由于每次创建或复用workInProgress是从current.alertnate拿对象
   workInProgress.updateQueue = current.updateQueue;
 
-  workInProgress.child = current.child;
+  // workInProgress.child = current.child;
   workInProgress.memoizedProps = current.memoizedProps;
   workInProgress.memoizedState = current.memoizedState;
   workInProgress.sibling = current.sibling;

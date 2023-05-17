@@ -12,15 +12,66 @@
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
     <title>React App</title>
+    <style>
+      table, th, td {
+        border:1px solid black;
+        border-collapse:collapse;
+      }
+      th, td {
+        padding:5px;
+        text-align: left;
+      }
+      td:nth-of-type(3n) {
+        text-align: center;
+      }
+    </style>
+    
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root" style="margin-bottom: 16px; margin-top: 16px;"></div>
+    <!-- <div id="root" style="margin-bottom: 16px; margin-top: 16px;"></div> -->
 
-    <div>
-      <button id="mount">渲染</button> &lt;div key=&quot;app&quot; id=&quot;title&quot;&gt;title&lt;/div&gt;<br/><br/>
-
-      <button id="singleUpdate">单节点更新：Key相同Type相同 复用老节点只更新属性</button>  &lt;div key=&quot;app&quot; id=&quot;title2&quot;&gt;title2&lt;/div&gt;<br/><br/>
-    </div>
+    <table style="width:100%">
+      <tr>
+        <th style="width: 260px">DOM操作</th>
+        <th style="width: 480px">DOM举🌰</th>
+        <th style="width: 120px; text-align: center;">Action</th>
+        <th style="text-align: center;">渲染区🌲</th>
+      </tr>
+      <tr>
+        <td>单节点挂载</td>
+        <td>
+          &lt;div key=&quot;app&quot; id=&quot;title&quot;&gt;title&lt;/div&gt;
+        </td>    
+        <td>
+          <button id="singleMount">挂载</button>
+        </td>    
+        <td rowspan="3">
+          <div id="root"></div>
+        </td>
+      </tr>
+      <tr>
+        <td>单节点更新</td>
+        <td>
+          &lt;div key=&quot;app&quot; id=&quot;title2&quot;&gt;title2&lt;/div&gt;
+        </td>
+        <td >
+          <button id="singleUpdate">更新</button>
+        </td>
+      </tr>
+      <tr>
+        <td>多节点挂载</td>
+        <td>
+          &lt;ul key=&quot;list&quot;&gt;<br/>
+          &nbsp;&nbsp;&lt;li key=&quot;a&quot;&gt;a&lt;/li&gt;<br/>
+          &nbsp;&nbsp;&lt;li key=&quot;b&quot;&gt;b&lt;/li&gt;<br/>
+          &nbsp;&nbsp;&lt;li key=&quot;c&quot;&gt;c&lt;/li&gt;<br/>
+          &lt;/ul&gt;
+        </td>
+        <td >
+          <button id="childrenMount">挂载</button>
+        </td>
+      </tr>
+    </table>
   </body>
 </html>

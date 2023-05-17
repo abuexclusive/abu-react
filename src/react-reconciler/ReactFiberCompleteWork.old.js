@@ -6,6 +6,7 @@ import {
   prepareUpdate,
 } from '../react-dom/client/ReactDOMHostConfig';
 import { Update } from './ReactFiberFlags';
+import { appendChild } from '../react-dom/client/ReactDOMHostConfig';
 
 
 
@@ -15,8 +16,35 @@ function markUpdate(workInProgress) {
   // 如果原来是 0 变成 4 更新
   // 如果原来是 2 变成 6 移动
   // flags 可能是累加的，有的节点及可能是新节点 又可能移动
-  workInProgress.flags |= Update;
+  workInProgress.flags = Update;
 }
+
+
+function appendAllChildren(parent, workInProgress) {
+  let node = workInProgress.child;
+  while (node !== null) {
+    if (node.tag === HostComponent) {
+      appendChild(parent, node.stateNode);
+    }else if (node.child !== null) {
+      node.child.return = node;
+      node = node.child;
+      continue;
+    }
+
+    if (node === workInProgress) {
+      return;
+    }
+    while (node.sibling === null) {
+      if (node.return === null || node.return === workInProgress) {
+        return;
+      }
+      node = node.return;
+    }
+    node.sibling.return = node.return;
+    node = node.sibling;
+  }
+}
+
 
 // 更新 workInProgress 的 stateNode
 function updateHostComponent(current, workInProgress, type, newProps) {
@@ -70,11 +98,18 @@ function completeWork(current, workInProgress) {
       const type = workInProgress.type;
 
       if (current !== null && workInProgress.stateNode !== null) {
+        // 更新
         // 说明 workInProgress 复用了 current，更新DOM属性
         updateHostComponent(current, workInProgress, type, newProps);
+
       } else {
+        // 挂载
         // 创建真实DOM
         const instance = createInstance(type, newProps);
+
+        // instance 挂载子组件 把自己的儿子都挂载在自己身上
+        appendAllChildren(instance, workInProgress);
+        
         workInProgress.stateNode = instance;
         // 给真实DOM添加属性
         finalizeInitialChildren(instance, type, newProps);

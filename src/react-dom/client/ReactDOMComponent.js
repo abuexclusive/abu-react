@@ -73,22 +73,27 @@ export function updateProperties(domElement, updatePayload) {
 // 比较新旧属性的差异
 export function diffProperties(domElement, tag, lastRawProps, nextRawProps) {
 
+  debugger
+
   let updatePayload = null;
   // updatePayload = [key1, value1, key2, value2]
  
   let propKey;
 
+  let lastProps = lastRawProps || {};
+  let nextProps = nextRawProps || {};
+
   // 循环老属性中的key
-  for (propKey in lastRawProps) {
-    if (lastRawProps.hasOwnProperty(propKey) && !nextRawProps.hasOwnProperty(propKey)) {
+  for (propKey in lastProps) {
+    if (lastProps.hasOwnProperty(propKey) && !nextProps.hasOwnProperty(propKey)) {
       (updatePayload = updatePayload || []).push(propKey, null);
     }
   }
 
   // 循环新属性中的key
-  for (propKey in nextRawProps) {
+  for (propKey in nextProps) {
     // 新的值
-    const nextProp = nextRawProps[propKey];
+    const nextProp = nextProps[propKey];
 
     if (propKey === STYLE) {
 
@@ -96,7 +101,7 @@ export function diffProperties(domElement, tag, lastRawProps, nextRawProps) {
 
     } else if (propKey === CHILDREN) {
       if (typeof nextProp === 'string' || typeof nextProp === 'number') {
-        if (nextProp !== lastRawProps[propKey]) {
+        if (nextProp !== lastProps[propKey]) {
           // 如果不同则添加到更细数组中
           (updatePayload = updatePayload || []).push(propKey, nextProp);
         }

@@ -64,6 +64,8 @@ function performSyncWorkOnRoot(root) {
   const current = root.current;
   workInProgress = createWorkInProgress(current, null);
 
+  // debugger
+
 
   /**
    * 
@@ -104,13 +106,13 @@ function performUnitOfWork(unitOfWork) {
   // 当前fiber的替身
   const current = unitOfWork.alternate;
 
-  // beginWork 是创建fiber 并添加 Placement 副作用
+  // beginWork 由上到下（外到内）创建fiber
   let next = beginWork(current, unitOfWork);
 
 
   if (next === null) {
     
-    // completeUnitOfWork 是 创建stateNode 并收集副作用
+    // completeUnitOfWork 由下到上（内到外）创建stateNode 并收集副作用 
     completeUnitOfWork(unitOfWork);
 
   } else {
@@ -119,7 +121,13 @@ function performUnitOfWork(unitOfWork) {
 }
 
 
-// 创建stateNode 并收集副作用
+/**
+ * 1、创建stateNode
+ * 2、收集副作用
+ * 3、寻找siblingFiber 或 returnFiber，深度遍历结束了
+ * 
+ * unitOfWork 完成的fiber
+ */
 function completeUnitOfWork(unitOfWork) {
   let completedWork = unitOfWork;
 
@@ -129,6 +137,7 @@ function completeUnitOfWork(unitOfWork) {
     const returnFiber = completedWork.return;
 
     // 1、完成此fiber对应真实DOM的创建 指向fiber的stateNode属性 和 属性赋值的功能
+    // 2、副作用挂载
     completeWork(current, completedWork);
 
     
@@ -229,11 +238,15 @@ function completeUnitOfWork(unitOfWork) {
 
 function commitRoot(root) {
   // 指向新的fiber tree
-  const finishedWork = root.current.alternate;
-  root.finishedWork = finishedWork;
+  const finishedWork = workInProgressRoot.current.alternate;
+  workInProgressRoot.finishedWork = finishedWork;
 
   commitMutationEffects(root);
 
+  // 将 workInprogress 重新赋值给 current
+  root.current = finishedWork;
+
+  root.finishedWork = null;
 }
 
 
@@ -246,18 +259,20 @@ function commitMutationEffects(root) {
   // 获取新的fiber tree的 effectlist
   let nextEffect = finishedWork.firstEffect;
 
-
+  let effectlist = '';
 
   while (nextEffect !== null) {
 
     const flags = nextEffect.flags;
+
+    effectlist += `(${nextEffect.flags}#${nextEffect.type}#${nextEffect.key}) => `
 
     // 这里 flags 对应 Placement Update PlacementAndUpdate 和 Deletion 处理各不相同
 
     // eslint-disable-next-line default-case
     switch (flags) {
       case Placement: {
-        // 把 fiber 对应的 真实DOM插入容器中
+        // 把 fiber 对应的 真实DOM插入
         commitPlacement(nextEffect);
         break;
       }
@@ -277,5 +292,8 @@ function commitMutationEffects(root) {
 
     nextEffect = nextEffect.nextEffect;
   }
+
+  effectlist += 'null';
+  console.log(effectlist);
 
 }

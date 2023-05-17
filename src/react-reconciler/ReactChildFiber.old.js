@@ -5,58 +5,12 @@ import {
   HostComponent
 } from './ReactWorkTags';
 import {
-  createFiber,
   createFiberFromText,
   createFiberFromElement,
 } from './ReactFiber.old';
 import { Deletion, Placement } from './ReactFiberFlags';
 import { createWorkInProgress } from './ReactFiber.old';
 
-
-// function reconcileChildrenArray(returnFiber, newChildren) {
-//   // newChildren：['text', {…}, {…}, {…}]
-//   // console.log('newChildren===', newChildren)
-
-//   // return的第一个fiber
-//   let resultingFirstChild = null;
-//   // 上一个新的fiber
-//   let previousNewFiber = null;
-//   for(let newIdx = 0; newIdx < newChildren.length; newIdx++) {
-//     let newFiber = null;
-//     const element = newChildren[newIdx];
-//     if (typeof element === 'string' || typeof element === 'number') {
-     
-//       newFiber = reconcileSingleTextNode(returnFiber, element);
-
-//     } else {
-//       newFiber = reconcileSingleElement(returnFiber, element);
-//     }
-//     if (previousNewFiber === null) {
-//       resultingFirstChild = newFiber;
-//     } else {
-//       previousNewFiber.sibling = newFiber;
-//     }
-//     previousNewFiber = newFiber;
-
-//     // if (newIdx === 0) {
-//     //   if (typeof element === 'string' || typeof element === 'number') {
-//     //     returnFiber.child = reconcileSingleTextNode(returnFiber, newChildren[newIdx]);
-//     //   } else {
-//     //     returnFiber.child = reconcileSingleElement(returnFiber, newChildren[newIdx]);
-//     //   }
-//     //   previousNewFiber = returnFiber.child;
-//     // } else {
-//     //   if (typeof element === 'string' || typeof element === 'number') {
-//     //     previousNewFiber.sibling = reconcileSingleTextNode(returnFiber, newChildren[newIdx]);
-//     //   } else {
-//     //     previousNewFiber.sibling = reconcileSingleElement(returnFiber, newChildren[newIdx]);
-//     //   }
-//     //   previousNewFiber = previousNewFiber.sibling;
-//     // }
-//   }
-
-//   return resultingFirstChild;
-// }
 
 
 function ChildReconciler(shouldTrackSideEffects) {
@@ -66,6 +20,22 @@ function ChildReconciler(shouldTrackSideEffects) {
     const clone = createWorkInProgress(fiber, pendingProps);
     clone.sibling = null;
     return clone;
+  }
+
+  // 创建fiber
+  function createChild(returnFiber, newChild) {
+    if (typeof newChild === 'string' || typeof newChild === 'number') {
+      const created = createFiberFromText(newChild);
+      created.return = returnFiber;
+      return created;
+    }
+
+    if (typeof newChild === 'object' && newChild !== null) {
+      const created = createFiberFromElement(newChild);
+      created.return = returnFiber;
+      return created;
+    }
+
   }
 
   // 标记 删除fiber
@@ -112,6 +82,9 @@ function ChildReconciler(shouldTrackSideEffects) {
 
   // 放置单节点 打标记
   function placeSingChild(newFiber) {
+    // 需要跟踪副作用 并且当前fiber没有副本 说明就是新创建的 
+    // mount 不需要跟踪副作用
+    // 当挂载一个新的节点的时候 并没有跟踪副作用 而是在completeWork 时将fiber对应的子DOM创建并追加给父fiber的stateNode
     if (shouldTrackSideEffects && newFiber.alternate === null) {
       // 给新fiber添加副作用，表示在未来提交阶段的DOM操作中会向真实DOM树中添加此节点
       // Placement 添加 创建 或者挂载
@@ -178,9 +151,44 @@ function ChildReconciler(shouldTrackSideEffects) {
   }
 
 
-  // 根据多个 element 创建 fiber，此时是数组，同级的 fiber 需要循环创建完成
+
+  /**
+   * * 调度多节点 
+   * 1、根据多个 element 创建 fiber，此时是数组，同级的 fiber 需要循环创建完成
+   * 2、多节点更新逻辑 diif
+   * 
+   * returnFiber 
+   * currentFirstChild 
+   * newChildren  
+   */
   function reconcileChildrenArray(returnFiber, currentFirstChild, newChildren) {
-    console.log('returnFiber: ', returnFiber, newChildren)
+
+    // 返回的第一个大儿子
+    let resultingFirstChild = null;
+    let previousNewFiber = null;
+
+    // 第一个老fiber
+    let oldFiber = currentFirstChild;
+    let newIdx = 0;
+
+    if (oldFiber === null) {
+      // 说明没有老节点 是新创建的
+      for(; newIdx < newChildren.length; newIdx++) {
+        const newFiber = createChild(returnFiber, newChildren[newIdx]);
+        // newFiber.flags = Placement;
+        if (previousNewFiber === null) {
+
+          resultingFirstChild = newFiber;
+
+        } else {
+          previousNewFiber.sibling = newFiber;
+        }
+        previousNewFiber = newFiber;
+      }
+      return resultingFirstChild;
+    }
+    
+    return resultingFirstChild;
   }
 
 
