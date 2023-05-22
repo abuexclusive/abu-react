@@ -109,7 +109,9 @@ function performUnitOfWork(unitOfWork) {
   // beginWork 由上到下（外到内）创建fiber
   let next = beginWork(current, unitOfWork);
 
-
+  // fiber 构建完成时候将新属性 同步给 老属性
+  unitOfWork.memoizedProps = unitOfWork.pendingProps;
+  
   if (next === null) {
     
     // completeUnitOfWork 由下到上（内到外）创建stateNode 并收集副作用 
@@ -136,7 +138,7 @@ function completeUnitOfWork(unitOfWork) {
     const current = completedWork.alternate;
     const returnFiber = completedWork.return;
 
-    // 1、完成此fiber对应真实DOM的创建 指向fiber的stateNode属性 和 属性赋值的功能
+    // 1、完成此fiber对应真实DOM的创建和属性赋值的功能 指向fiber的stateNode属性 
     // 2、副作用挂载
     completeWork(current, completedWork);
 

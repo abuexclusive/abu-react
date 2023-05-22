@@ -83,6 +83,8 @@ function updateHostComponent(current, workInProgress, type, newProps) {
 function completeWork(current, workInProgress) {
   // console.log('completeWork workInProgress: ', workInProgress);
 
+  // debugger
+
   const newProps = workInProgress.pendingProps;
     // 1、创建真实的DOM
     // 1.1、<h1>对应的fiber，这时<h1>对应的fiber有兄弟节点<h2>，该兄弟节点已经在beginWork中创建完成，返回<h2>对应的fiber，作为下一个工作单元

@@ -47,6 +47,9 @@ function commitPlacement(finishedWork) {
       parent = parentStateNode;
       break;
   }
+
+  // 插入时需要注意，需要插入到离它最近的真实DOM前面
+  // （删除#li#B）=>（插入#P#B）=>（更新#li#C）=> null
   appendChild(parent, stateNode);
 }
 

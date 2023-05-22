@@ -13,7 +13,7 @@ export function render(element, container) {
 
   // console.log('element===', element);
 
-  debugger
+  // debugger
 
   legacyRenderSubtreeIntoContainer(element, container);
 }
